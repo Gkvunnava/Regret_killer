@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>₹1, One Regret</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#15120f;
+    --ink-soft:#1e1a16;
+    --paper:#ede4d3;
+    --paper-dim:#c9bda4;
+    --ember:#c1602f;
+    --ember-dim:#8a4522;
+    --ash:#655c4e;
+  }
+
+  *{box-sizing:border-box;}
+
+  html,body{
+    margin:0;
+    min-height:100%;
+    background:
+      radial-gradient(ellipse 900px 600px at 50% 20%, #241d17 0%, var(--ink) 60%);
+    color:var(--paper);
+    font-family:'Inter', sans-serif;
+    overflow-x:hidden;
+  }
+
+  .stage{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:48px 20px 64px;
+    position:relative;
+  }
+
+  .mark{
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:var(--ember);
+    box-shadow:0 0 14px 3px rgba(193,96,47,0.55);
+    margin-bottom:22px;
+  }
+
+  h1{
+    font-family:'Cormorant Garamond', serif;
+    font-weight:500;
+    font-size:clamp(28px, 6vw, 40px);
+    letter-spacing:0.01em;
+    margin:0 0 10px;
+    text-align:center;
+    line-height:1.15;
+    color:var(--paper);
+  }
+
+  .sub{
+    font-size:14.5px;
+    color:var(--paper-dim);
+    text-align:center;
+    max-width:320px;
+    line-height:1.55;
+    margin:0 0 36px;
+  }
+
+  .ticker{
+    font-size:12px;
+    color:var(--ash);
+    letter-spacing:0.02em;
+    text-align:center;
+    margin:0 0 30px;
+  }
+  .ticker b{
+    color:var(--ember);
+    font-weight:600;
+  }
+
+  .wall{
+    width:100%;
+    max-width:340px;
+    margin-top:40px;
+  }
+  .wall-label{
+    font-size:11px;
+    color:var(--ash);
+    letter-spacing:0.03em;
+    text-align:center;
+    margin:0 0 10px;
+  }
+  .wall-list{
+    max-height:150px;
+    overflow-y:auto;
+    border:1px solid #2a231c;
+    border-radius:2px;
+    padding:10px 13px;
+    background:rgba(255,255,255,0.015);
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+  }
+  .wall-row{
+    display:flex;
+    justify-content:space-between;
+    font-family:monospace;
+    font-size:11px;
+    color:var(--paper-dim);
+    opacity:0.8;
+  }
+  .wall-row time{
+    color:var(--ash);
+    font-family:'Inter', sans-serif;
+    font-size:10.5px;
+  }
+  .wall-row.new{
+    color:var(--ember);
+    opacity:1;
+  }
+  .wall-empty{
+    font-size:11.5px;
+    color:var(--ash);
+    text-align:center;
+    padding:6px 0;
+  }
+
+  /* ---- the note ---- */
+  .note-wrap{
+    position:relative;
+    width:100%;
+    max-width:340px;
+  }
+
+  .note{
+    background:
+      linear-gradient(180deg, #efe6d6 0%, #e6dac3 100%);
+    border-radius:2px;
+    padding:26px 22px 20px;
+    box-shadow:
+      0 18px 40px -12px rgba(0,0,0,0.55),
+      0 2px 0 rgba(255,255,255,0.06) inset;
+    position:relative;
+    transition:transform 0.4s ease, opacity 0.4s ease;
+  }
+
+  .note::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.025) 0px, rgba(0,0,0,0.025) 1px, transparent 1px, transparent 27px);
+    border-radius:2px;
+    pointer-events:none;
+  }
+
+  .note-label{
+    font-size:11px;
+    letter-spacing:0.04em;
+    color:var(--ember-dim);
+    margin:0 0 10px;
+    font-weight:500;
+  }
+
+  textarea{
+    width:100%;
+    min-height:110px;
+    background:transparent;
+    border:none;
+    resize:none;
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-size:19px;
+    line-height:1.5;
+    color:#2a2118;
+    outline:none;
+    position:relative;
+  }
+
+  textarea::placeholder{
+    color:#a89a80;
+    font-style:italic;
+  }
+
+  .count{
+    text-align:right;
+    font-size:11px;
+    color:#a89a80;
+    margin-top:2px;
+  }
+
+  .kill-btn{
+    width:100%;
+    max-width:340px;
+    margin-top:22px;
+    padding:15px 20px;
+    background:var(--ember);
+    color:#1a0f08;
+    border:none;
+    border-radius:2px;
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:15px;
+    letter-spacing:0.01em;
+    cursor:pointer;
+    transition:background 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+  }
+
+  .kill-btn:disabled{
+    opacity:0.4;
+    cursor:not-allowed;
+  }
+
+  .kill-btn:not(:disabled):hover{
+    background:#d16d38;
+  }
+
+  .kill-btn:not(:disabled):active{
+    transform:scale(0.985);
+  }
+
+  .fineprint{
+    margin-top:16px;
+    font-size:11.5px;
+    color:var(--ash);
+    text-align:center;
+    max-width:300px;
+  }
+
+  /* ---- processing ---- */
+  .status-line{
+    display:none;
+    align-items:center;
+    gap:8px;
+    margin-top:22px;
+    font-size:13px;
+    color:var(--paper-dim);
+  }
+  .status-line.show{ display:flex; }
+
+  .dot-flicker{
+    width:5px; height:5px; border-radius:50%;
+    background:var(--ember);
+    animation:flicker 0.9s infinite ease-in-out;
+  }
+  @keyframes flicker{
+    0%,100%{ opacity:0.25; }
+    50%{ opacity:1; }
+  }
+
+  /* ---- burning ---- */
+  .note.burning{
+    animation:char 1.6s ease forwards;
+  }
+  @keyframes char{
+    0%{ filter:brightness(1) saturate(1); }
+    40%{ filter:brightness(0.6) saturate(0.4) sepia(0.4); }
+    100%{ filter:brightness(0.15) saturate(0); opacity:0; transform:scale(0.94); }
+  }
+
+  .ash-field{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    overflow:visible;
+  }
+  .ash{
+    position:absolute;
+    bottom:10%;
+    width:3px;
+    height:3px;
+    background:var(--ember);
+    border-radius:50%;
+    opacity:0;
+  }
+  .ash.go{
+    animation:rise 1.8s ease-out forwards;
+  }
+  @keyframes rise{
+    0%{ opacity:0; transform:translateY(0) translateX(0); }
+    15%{ opacity:0.9; }
+    100%{ opacity:0; transform:translateY(-160px) translateX(var(--drift, 12px)); }
+  }
+
+  /* ---- certificate ---- */
+  .cert{
+    display:none;
+    width:100%;
+    max-width:340px;
+    background:linear-gradient(180deg, #1c1712 0%, #171310 100%);
+    border:1px solid #3a2f22;
+    border-radius:2px;
+    padding:30px 24px 26px;
+    text-align:center;
+    animation:rise-in 0.6s ease forwards;
+  }
+  .cert.show{ display:block; }
+
+  @keyframes rise-in{
+    from{ opacity:0; transform:translateY(14px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  .cert-eyebrow{
+    font-size:11px;
+    letter-spacing:0.04em;
+    color:var(--ember);
+    margin-bottom:14px;
+  }
+
+  .cert-title{
+    font-family:'Cormorant Garamond', serif;
+    font-size:26px;
+    font-style:italic;
+    color:var(--paper);
+    margin:0 0 18px;
+  }
+
+  .cert-rule{
+    height:1px;
+    background:linear-gradient(90deg, transparent, #3a2f22, transparent);
+    margin:18px 0;
+  }
+
+  .cert-row{
+    display:flex;
+    justify-content:space-between;
+    font-size:12.5px;
+    color:var(--paper-dim);
+    margin-bottom:9px;
+  }
+  .cert-row span:last-child{
+    color:var(--paper);
+    font-weight:500;
+  }
+
+  .cert-count{
+    margin-top:18px;
+    font-size:12px;
+    color:var(--ash);
+  }
+  .cert-count b{
+    color:var(--ember);
+    font-weight:600;
+  }
+
+  .again-btn{
+    margin-top:24px;
+    background:none;
+    border:1px solid #3a2f22;
+    color:var(--paper-dim);
+    font-family:'Inter', sans-serif;
+    font-size:13px;
+    padding:11px 18px;
+    border-radius:2px;
+    cursor:pointer;
+    width:100%;
+    transition:border-color 0.2s ease, color 0.2s ease;
+  }
+  .again-btn:hover{
+    border-color:var(--ember-dim);
+    color:var(--paper);
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="mark"></div>
+  <h1>One rupee.<br>One regret.</h1>
+  <p class="sub">Type it. Pay it. Watch it die. No refunds, no judgment, no trace.</p>
+  <p class="ticker" id="ticker">loading the count…</p>
+
+  <div class="note-wrap" id="noteWrap">
+    <div class="note" id="note">
+      <p class="note-label">what are you carrying</p>
+      <textarea id="regretInput" maxlength="180" placeholder="I never called her back after the funeral..."></textarea>
+      <div class="count"><span id="charCount">0</span>/180</div>
+      <div class="ash-field" id="ashField"></div>
+    </div>
+  </div>
+
+  <button class="kill-btn" id="killBtn" disabled>Kill it — ₹1</button>
+  <div class="status-line" id="statusLine">
+    <span class="dot-flicker"></span>
+    <span id="statusText">processing payment…</span>
+  </div>
+  <p class="fineprint">Payment via UPI. What you type never leaves this page.</p>
+
+  <div class="cert" id="cert">
+    <p class="cert-eyebrow">CERTIFICATE OF TERMINATION</p>
+    <p class="cert-title">This regret has been dealt with.</p>
+    <div class="cert-rule"></div>
+    <div class="cert-row"><span>Serial</span><span id="certSerial">—</span></div>
+    <div class="cert-row"><span>Date</span><span id="certDate">—</span></div>
+    <div class="cert-row"><span>Status</span><span>Terminated</span></div>
+    <div class="cert-rule"></div>
+    <p class="cert-count">You're the <b id="certCount">—</b>th person to let one go here.</p>
+    <button class="again-btn" id="againBtn">Kill another</button>
+  </div>
+
+  <div class="wall" id="wall">
+    <p class="wall-label">the ledger — hashed, never readable</p>
+    <div class="wall-list" id="wallList"></div>
+  </div>
+</div>
+
+<script>
+  const input = document.getElementById('regretInput');
+  const charCount = document.getElementById('charCount');
+  const killBtn = document.getElementById('killBtn');
+  const note = document.getElementById('note');
+  const noteWrap = document.getElementById('noteWrap');
+  const statusLine = document.getElementById('statusLine');
+  const statusText = document.getElementById('statusText');
+  const ashField = document.getElementById('ashField');
+  const cert = document.getElementById('cert');
+  const certSerial = document.getElementById('certSerial');
+  const certDate = document.getElementById('certDate');
+  const certCount = document.getElementById('certCount');
+  const againBtn = document.getElementById('againBtn');
+  const fineprint = document.querySelector('.fineprint');
+
+  input.addEventListener('input', () => {
+    charCount.textContent = input.value.length;
+    killBtn.disabled = input.value.trim().length === 0;
+  });
+
+  function spawnAsh(){
+    for(let i=0;i<14;i++){
+      const a = document.createElement('div');
+      a.className = 'ash';
+      a.style.left = (10 + Math.random()*80) + '%';
+      a.style.setProperty('--drift', (Math.random()*60 - 30) + 'px');
+      a.style.animationDelay = (Math.random()*0.5) + 's';
+      ashField.appendChild(a);
+      requestAnimationFrame(() => a.classList.add('go'));
+    }
+  }
+
+  const ticker = document.getElementById('ticker');
+  const wallList = document.getElementById('wallList');
+  const MAX_WALL = 40;
+  let localFallback = { count: 0, wall: [] };
+
+  async function sha256Hex(text){
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  function fmtTime(ts){
+    const d = new Date(ts);
+    return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short' });
+  }
+
+  function renderWall(data, newHash){
+    ticker.innerHTML = '<b>' + data.count.toLocaleString('en-IN') + '</b> regrets terminated so far';
+    wallList.innerHTML = '';
+    if(!data.wall.length){
+      wallList.innerHTML = '<p class="wall-empty">be the first entry</p>';
+      return;
+    }
+    data.wall.forEach(entry => {
+      const row = document.createElement('div');
+      row.className = 'wall-row' + (entry.h === newHash ? ' new' : '');
+      row.innerHTML = '<span>' + entry.h.slice(0,12) + '</span><time>' + fmtTime(entry.t) + '</time>';
+      wallList.appendChild(row);
+    });
+  }
+
+  async function loadWall(){
+    try{
+      const res = await fetch('/api/regrets');
+      if(!res.ok) throw new Error('ledger fetch failed');
+      const data = await res.json();
+      localFallback = data;
+      renderWall(data);
+    }catch(e){
+      renderWall(localFallback);
+    }
+  }
+
+  async function recordRegret(regretText){
+    const fullHash = await sha256Hex(regretText + '|' + Date.now() + '|' + Math.random());
+    const shortHash = fullHash.slice(0, 12);
+    try{
+      const res = await fetch('/api/regrets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ hash: shortHash })
+      });
+      if(!res.ok) throw new Error('ledger write failed');
+      const data = await res.json();
+      localFallback = data;
+      renderWall(data, shortHash);
+      return { count: data.count, hash: shortHash };
+    }catch(e){
+      localFallback.count += 1;
+      localFallback.wall.unshift({ h: shortHash, t: Date.now() });
+      localFallback.wall = localFallback.wall.slice(0, MAX_WALL);
+      renderWall(localFallback, shortHash);
+      return { count: localFallback.count, hash: shortHash };
+    }
+  }
+
+  loadWall();
+
+  killBtn.addEventListener('click', async () => {
+    killBtn.disabled = true;
+    input.disabled = true;
+    statusLine.classList.add('show');
+    fineprint.style.visibility = 'hidden';
+
+    // Simulated payment step — wire a real Razorpay Payment Link/checkout here.
+    await new Promise(r => setTimeout(r, 1100));
+    statusText.textContent = 'payment received — deleting…';
+    await new Promise(r => setTimeout(r, 400));
+
+    note.classList.add('burning');
+    spawnAsh();
+
+    const regretText = input.value.trim();
+    const { count, hash } = await recordRegret(regretText);
+
+    await new Promise(r => setTimeout(r, 1700));
+    noteWrap.style.display = 'none';
+    killBtn.style.display = 'none';
+    statusLine.classList.remove('show');
+    fineprint.style.display = 'none';
+
+    const now = new Date();
+    certSerial.textContent = hash.slice(0,12);
+    certDate.textContent = now.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+    certCount.textContent = count.toLocaleString('en-IN');
+    cert.classList.add('show');
+  });
+
+  againBtn.addEventListener('click', () => {
+    cert.classList.remove('show');
+    note.classList.remove('burning');
+    ashField.innerHTML = '';
+    input.value = '';
+    input.disabled = false;
+    charCount.textContent = '0';
+    noteWrap.style.display = 'block';
+    killBtn.style.display = 'block';
+    killBtn.disabled = true;
+    fineprint.style.display = 'block';
+    fineprint.style.visibility = 'visible';
+  });
+</script>
+
+</body>
+</html>
