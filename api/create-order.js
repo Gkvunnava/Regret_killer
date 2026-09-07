@@ -1,38 +1,46 @@
-import Razorpay from 'razorpay';
-
-const AMOUNT_PAISE = 100; // ₹1, fixed — never trust an amount from the client
+import {
+  AMOUNT_PAISE,
+  CURRENCY,
+  describeGatewayError,
+  getKeys,
+  getRazorpay,
+  methodGuard,
+} from './_lib/payment.js';
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
-    return res.status(405).json({ error: 'Method not allowed.' });
-  }
+  if (methodGuard(req, res, 'POST')) return;
 
-  const keyId = process.env.RAZORPAY_KEY_ID;
-  const keySecret = process.env.RAZORPAY_KEY_SECRET;
-
-  if (!keyId || !keySecret) {
-    console.error('create-order: missing Razorpay env vars');
-    return res.status(401).json({ error: 'Payment gateway not configured.' });
+  const razorpay = getRazorpay();
+  if (!razorpay) {
+    console.error('create-order: RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET are not set');
+    return res.status(503).json({
+      code: 'not_configured',
+      error: 'Payment gateway is not configured yet.',
+    });
   }
 
   try {
-    const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
-
     const order = await razorpay.orders.create({
       amount: AMOUNT_PAISE,
-      currency: 'INR',
-      receipt: `regret_${Date.now()}`,
+      currency: CURRENCY,
+      // Receipt is capped at 40 chars by Razorpay.
+      receipt: `regret_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
+      notes: { product: 'one-rupee-one-regret' },
     });
+
+    // No-store: an order id is single use, a cached one would be replayed by
+    // the next visitor behind the same CDN edge.
+    res.setHeader('Cache-Control', 'no-store');
 
     return res.status(200).json({
       order_id: order.id,
       amount: order.amount,
       currency: order.currency,
-      key_id: keyId, // Razorpay's key_id is public by design — safe to hand to the client
+      key_id: getKeys().keyId, // publishable by design
     });
   } catch (err) {
-    console.error('create-order error:', err);
-    return res.status(500).json({ error: 'Could not create payment order.' });
+    const mapped = describeGatewayError(err);
+    console.error('create-order error:', mapped.description);
+    return res.status(mapped.status).json({ code: mapped.code, error: mapped.error });
   }
 }

@@ -1,61 +1,17 @@
-import { Redis } from '@upstash/redis';
+import { readLedger } from './_lib/ledger.js';
+import { methodGuard } from './_lib/payment.js';
 
-const redis = Redis.fromEnv();
-
-const COUNT_KEY = 'regrets:count';
-const WALL_KEY = 'regrets:wall';
-const MAX_WALL = 40;
-
+// Read only. Writes happen in verify-payment, behind a confirmed Rs 1 payment —
+// an open POST here let anyone run the counter up for free.
 export default async function handler(req, res) {
+  if (methodGuard(req, res, 'GET')) return;
+
   try {
-    if (req.method === 'GET') {
-      const [count, wall] = await Promise.all([
-        redis.get(COUNT_KEY),
-        redis.lrange(WALL_KEY, 0, MAX_WALL - 1),
-      ]);
-
-      return res.status(200).json({
-        count: Number(count) || 0,
-        wall: (wall || []).map(parseEntry).filter(Boolean),
-      });
-    }
-
-    if (req.method === 'POST') {
-      const { hash } = req.body || {};
-
-      if (typeof hash !== 'string' || !/^[a-f0-9]{12}$/.test(hash)) {
-        return res.status(400).json({ error: 'Send a 12-character hex hash.' });
-      }
-
-      const entry = JSON.stringify({ h: hash, t: Date.now() });
-
-      const [count] = await Promise.all([
-        redis.incr(COUNT_KEY),
-        redis.lpush(WALL_KEY, entry),
-      ]);
-      await redis.ltrim(WALL_KEY, 0, MAX_WALL - 1);
-
-      const wall = await redis.lrange(WALL_KEY, 0, MAX_WALL - 1);
-
-      return res.status(200).json({
-        count: Number(count) || 0,
-        wall: (wall || []).map(parseEntry).filter(Boolean),
-      });
-    }
-
-    res.setHeader('Allow', 'GET, POST');
-    return res.status(405).json({ error: 'Method not allowed.' });
+    const ledger = await readLedger();
+    res.setHeader('Cache-Control', 'no-store');
+    return res.status(200).json(ledger);
   } catch (err) {
-    console.error('ledger error:', err);
-    return res.status(500).json({ error: 'Ledger unavailable.' });
-  }
-}
-
-function parseEntry(item) {
-  if (item && typeof item === 'object') return item;
-  try {
-    return JSON.parse(item);
-  } catch {
-    return null;
+    console.error('ledger error:', err.message);
+    return res.status(503).json({ code: 'ledger_unavailable', error: 'Ledger unavailable.' });
   }
 }

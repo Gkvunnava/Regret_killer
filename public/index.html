@@ -2,601 +2,1193 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>₹1, One Regret</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>One Rupee, One Regret</title>
+<meta name="description" content="Type the thing you are carrying. Pay one rupee. Watch it burn. No refunds, no judgment, no trace.">
+<meta name="theme-color" content="#0a0807">
+<meta property="og:title" content="One Rupee, One Regret">
+<meta property="og:description" content="Type it. Pay a rupee. Watch it burn.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>&#128293;</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#15120f;
-    --ink-soft:#1e1a16;
-    --paper:#ede4d3;
-    --paper-dim:#c9bda4;
-    --ember:#c1602f;
-    --ember-dim:#8a4522;
-    --ash:#655c4e;
+    --void:#080605;
+    --paper:#efe7d8;
+    --paper-dim:#b3a68e;
+    --ash:#6e6353;
+    --ember:#ff6f30;
+    --ember-deep:#b8431a;
+    --edge:#2c231b;
+    --burn-y:0px;
+    --burn-glow:0;
   }
 
-  *{box-sizing:border-box;}
+  *{ box-sizing:border-box; }
 
   html,body{
     margin:0;
     min-height:100%;
-    background:
-      radial-gradient(ellipse 900px 600px at 50% 20%, #241d17 0%, var(--ink) 60%);
+    background:var(--void);
     color:var(--paper);
-    font-family:'Inter', sans-serif;
+    font-family:'Inter',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
     overflow-x:hidden;
   }
 
+  /* ---------- atmosphere ---------- */
+
+  #embers{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .hearth{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:0;
+    background:
+      radial-gradient(ellipse 780px 520px at 50% 8%, rgba(90,48,24,0.30) 0%, transparent 70%),
+      radial-gradient(ellipse 900px 380px at 50% 106%, rgba(255,111,48,0.16) 0%, transparent 72%),
+      radial-gradient(ellipse 1200px 800px at 50% 45%, #1a120d 0%, var(--void) 72%);
+  }
+
+  /* Brightens for a beat while a note is burning. */
+  .flare{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:1;
+    background:radial-gradient(ellipse 700px 420px at 50% 60%, rgba(255,120,50,0.5) 0%, transparent 70%);
+    opacity:calc(var(--burn-glow) * 0.5);
+  }
+
+  .torch{
+    position:fixed;
+    top:0;
+    left:0;
+    width:520px;
+    height:520px;
+    margin:-260px 0 0 -260px;
+    pointer-events:none;
+    z-index:1;
+    background:radial-gradient(circle, rgba(255,120,50,0.09) 0%, transparent 62%);
+    opacity:0;
+    transition:opacity 0.6s ease;
+  }
+  .torch.lit{ opacity:1; }
+
   .stage{
+    position:relative;
+    z-index:2;
     min-height:100vh;
+    min-height:100dvh;
     display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    padding:48px 20px 64px;
-    position:relative;
+    padding:56px 20px 72px;
   }
 
-  .mark{
-    width:6px;
-    height:6px;
+  /* ---------- masthead ---------- */
+
+  .coal{
+    width:9px;
+    height:9px;
     border-radius:50%;
     background:var(--ember);
-    box-shadow:0 0 14px 3px rgba(193,96,47,0.55);
-    margin-bottom:22px;
+    margin-bottom:26px;
+    animation:breathe 3.4s ease-in-out infinite;
+  }
+  @keyframes breathe{
+    0%,100%{ box-shadow:0 0 10px 2px rgba(255,111,48,0.35); opacity:0.72; }
+    50%{ box-shadow:0 0 26px 7px rgba(255,111,48,0.62); opacity:1; }
   }
 
   h1{
-    font-family:'Cormorant Garamond', serif;
+    font-family:'Cormorant Garamond',serif;
     font-weight:500;
-    font-size:clamp(28px, 6vw, 40px);
-    letter-spacing:0.01em;
-    margin:0 0 10px;
+    font-size:clamp(34px,8.5vw,52px);
+    line-height:1.04;
+    letter-spacing:-0.005em;
+    margin:0 0 14px;
     text-align:center;
-    line-height:1.15;
-    color:var(--paper);
+  }
+  h1 .em{
+    display:block;
+    font-style:italic;
+    color:var(--ember);
+    text-shadow:0 0 34px rgba(255,111,48,0.35);
   }
 
   .sub{
-    font-size:14.5px;
+    font-size:14px;
     color:var(--paper-dim);
     text-align:center;
-    max-width:320px;
-    line-height:1.55;
-    margin:0 0 36px;
+    max-width:310px;
+    line-height:1.62;
+    margin:0 0 30px;
   }
 
   .ticker{
-    font-size:12px;
-    color:var(--ash);
-    letter-spacing:0.02em;
-    text-align:center;
-    margin:0 0 30px;
-  }
-  .ticker b{
-    color:var(--ember);
-    font-weight:600;
-  }
-
-  .wall{
-    width:100%;
-    max-width:340px;
-    margin-top:40px;
-  }
-  .wall-label{
-    font-size:11px;
-    color:var(--ash);
-    letter-spacing:0.03em;
-    text-align:center;
-    margin:0 0 10px;
-  }
-  .wall-list{
-    max-height:150px;
-    overflow-y:auto;
-    border:1px solid #2a231c;
-    border-radius:2px;
-    padding:10px 13px;
-    background:rgba(255,255,255,0.015);
-    display:flex;
-    flex-direction:column;
-    gap:7px;
-  }
-  .wall-row{
-    display:flex;
-    justify-content:space-between;
-    font-family:monospace;
-    font-size:11px;
-    color:var(--paper-dim);
-    opacity:0.8;
-  }
-  .wall-row time{
-    color:var(--ash);
-    font-family:'Inter', sans-serif;
-    font-size:10.5px;
-  }
-  .wall-row.new{
-    color:var(--ember);
-    opacity:1;
-  }
-  .wall-empty{
     font-size:11.5px;
     color:var(--ash);
+    letter-spacing:0.06em;
+    text-transform:uppercase;
     text-align:center;
-    padding:6px 0;
+    margin:0 0 34px;
+    min-height:16px;
+  }
+  .ticker b{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    color:var(--ember);
+    font-weight:500;
+    letter-spacing:0.02em;
   }
 
-  /* ---- the note ---- */
+  /* ---------- the note ---------- */
+
   .note-wrap{
     position:relative;
     width:100%;
-    max-width:340px;
+    max-width:352px;
   }
 
   .note{
-    background:
-      linear-gradient(180deg, #efe6d6 0%, #e6dac3 100%);
-    border-radius:2px;
-    padding:26px 22px 20px;
-    box-shadow:
-      0 18px 40px -12px rgba(0,0,0,0.55),
-      0 2px 0 rgba(255,255,255,0.06) inset;
     position:relative;
-    transition:transform 0.4s ease, opacity 0.4s ease;
+    padding:28px 24px 18px;
+    border-radius:1px;
+    background:
+      radial-gradient(ellipse 120% 80% at 30% 0%, rgba(255,255,255,0.5) 0%, transparent 60%),
+      linear-gradient(176deg, #f2ead9 0%, #e4d7bd 100%);
+    box-shadow:
+      0 26px 54px -18px rgba(0,0,0,0.78),
+      0 2px 10px rgba(0,0,0,0.35),
+      0 1px 0 rgba(255,255,255,0.5) inset;
+    transform:rotate(-0.5deg);
+    transition:transform 0.35s ease, box-shadow 0.35s ease;
+  }
+  .note-wrap:focus-within .note{
+    transform:rotate(0deg);
+    box-shadow:
+      0 30px 60px -18px rgba(0,0,0,0.8),
+      0 0 0 1px rgba(255,111,48,0.28),
+      0 0 34px -6px rgba(255,111,48,0.30);
   }
 
+  /* ruled lines, plus a little tooth in the paper */
   .note::before{
     content:"";
     position:absolute;
     inset:0;
-    background-image:
-      repeating-linear-gradient(0deg, rgba(0,0,0,0.025) 0px, rgba(0,0,0,0.025) 1px, transparent 1px, transparent 27px);
-    border-radius:2px;
+    border-radius:1px;
     pointer-events:none;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(72,52,30,0.055) 0px, rgba(72,52,30,0.055) 1px, transparent 1px, transparent 28px),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E");
+    background-position:0 22px, 0 0;
   }
 
   .note-label{
-    font-size:11px;
-    letter-spacing:0.04em;
-    color:var(--ember-dim);
-    margin:0 0 10px;
-    font-weight:500;
+    position:relative;
+    font-size:10px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:#9a6a3f;
+    margin:0 0 12px;
+    font-weight:600;
   }
 
   textarea{
+    position:relative;
+    display:block;
     width:100%;
-    min-height:110px;
+    min-height:118px;
     background:transparent;
     border:none;
     resize:none;
-    font-family:'Cormorant Garamond', serif;
+    font-family:'Cormorant Garamond',serif;
     font-style:italic;
-    font-size:19px;
-    line-height:1.5;
-    color:#2a2118;
+    font-size:20px;
+    line-height:28px;
+    color:#2b2118;
+    caret-color:var(--ember-deep);
     outline:none;
-    position:relative;
   }
-
-  textarea::placeholder{
-    color:#a89a80;
-    font-style:italic;
-  }
+  textarea::placeholder{ color:#a4906f; font-style:italic; }
+  textarea:disabled{ color:#2b2118; opacity:1; -webkit-text-fill-color:#2b2118; }
 
   .count{
+    position:relative;
     text-align:right;
-    font-size:11px;
-    color:#a89a80;
-    margin-top:2px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    color:#a4906f;
+    letter-spacing:0.04em;
   }
 
-  .kill-btn{
-    width:100%;
-    max-width:340px;
-    margin-top:22px;
-    padding:15px 20px;
-    background:var(--ember);
-    color:#1a0f08;
-    border:none;
-    border-radius:2px;
-    font-family:'Inter', sans-serif;
-    font-weight:600;
-    font-size:15px;
-    letter-spacing:0.01em;
-    cursor:pointer;
-    transition:background 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+  /* The burn: a ragged alpha ramp slid upward across the paper. */
+  .burnable{
+    -webkit-mask-image:var(--rag);
+    mask-image:var(--rag);
+    -webkit-mask-size:100% 300%;
+    mask-size:100% 300%;
+    -webkit-mask-repeat:no-repeat;
+    mask-repeat:no-repeat;
+    -webkit-mask-position:0 var(--burn-y);
+    mask-position:0 var(--burn-y);
   }
-
-  .kill-btn:disabled{
-    opacity:0.4;
-    cursor:not-allowed;
-  }
-
-  .kill-btn:not(:disabled):hover{
-    background:#d16d38;
-  }
-
-  .kill-btn:not(:disabled):active{
-    transform:scale(0.985);
-  }
-
-  .fineprint{
-    margin-top:16px;
-    font-size:11.5px;
-    color:var(--ash);
-    text-align:center;
-    max-width:300px;
-  }
-
-  /* ---- processing ---- */
-  .status-line{
-    display:none;
-    align-items:center;
-    gap:8px;
-    margin-top:22px;
-    font-size:13px;
-    color:var(--paper-dim);
-  }
-  .status-line.show{ display:flex; }
-
-  .dot-flicker{
-    width:5px; height:5px; border-radius:50%;
-    background:var(--ember);
-    animation:flicker 0.9s infinite ease-in-out;
-  }
-  @keyframes flicker{
-    0%,100%{ opacity:0.25; }
-    50%{ opacity:1; }
-  }
-
-  /* ---- burning ---- */
-  .note.burning{
-    animation:char 1.6s ease forwards;
-  }
+  /* No mask support: fall back to charring in place. */
+  .no-mask .note.burning{ animation:char 1.7s ease forwards; }
   @keyframes char{
-    0%{ filter:brightness(1) saturate(1); }
-    40%{ filter:brightness(0.6) saturate(0.4) sepia(0.4); }
-    100%{ filter:brightness(0.15) saturate(0); opacity:0; transform:scale(0.94); }
+    0%{ filter:none; }
+    45%{ filter:brightness(0.55) saturate(0.35) sepia(0.5); }
+    100%{ filter:brightness(0.1) saturate(0); opacity:0; transform:scale(0.94) rotate(-1deg); }
+  }
+
+  .char-line{
+    position:absolute;
+    left:-8%;
+    width:116%;
+    height:64px;
+    margin-top:-32px;
+    top:100%;
+    pointer-events:none;
+    opacity:0;
+    /* Scorch above the front, white-hot at it, embers below. Painted normally
+       rather than screened - screen over near-white paper is invisible. */
+    background:linear-gradient(180deg,
+      rgba(74,32,10,0) 0%,
+      rgba(96,40,12,0.42) 30%,
+      rgba(168,62,16,0.78) 42%,
+      rgba(255,166,64,0.96) 49%,
+      rgba(255,242,206,1) 53%,
+      rgba(255,138,42,0.82) 60%,
+      rgba(186,62,16,0.34) 72%,
+      rgba(120,40,10,0) 90%);
+    filter:blur(4px);
+    /* taper the ends, or it reads as a horizon line rather than the edge of a
+       burning piece of paper */
+    -webkit-mask-image:linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%);
+    mask-image:linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%);
   }
 
   .ash-field{
     position:absolute;
     inset:0;
-    pointer-events:none;
     overflow:visible;
+    pointer-events:none;
   }
   .ash{
     position:absolute;
-    bottom:10%;
     width:3px;
     height:3px;
-    background:var(--ember);
     border-radius:50%;
     opacity:0;
+    will-change:transform,opacity;
   }
-  .ash.go{
-    animation:rise 1.8s ease-out forwards;
-  }
+  .ash.go{ animation:rise var(--dur,2s) cubic-bezier(.25,.6,.4,1) forwards; }
   @keyframes rise{
-    0%{ opacity:0; transform:translateY(0) translateX(0); }
-    15%{ opacity:0.9; }
-    100%{ opacity:0; transform:translateY(-160px) translateX(var(--drift, 12px)); }
+    0%{ opacity:0; transform:translate3d(0,0,0) scale(1); }
+    12%{ opacity:1; }
+    100%{ opacity:0; transform:translate3d(var(--drift,14px),calc(-1 * var(--lift,200px)),0) scale(0.25); }
   }
 
-  /* ---- certificate ---- */
+  /* ---------- action ---------- */
+
+  .kill-btn{
+    position:relative;
+    overflow:hidden;
+    width:100%;
+    max-width:352px;
+    margin-top:24px;
+    padding:16px 20px;
+    border:none;
+    border-radius:2px;
+    background:linear-gradient(180deg, #ff7b3c 0%, #e2551f 100%);
+    color:#1b0d05;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    letter-spacing:0.02em;
+    cursor:pointer;
+    box-shadow:0 10px 30px -12px rgba(255,111,48,0.75);
+    transition:filter .2s ease, transform .12s ease, opacity .2s ease, box-shadow .2s ease;
+  }
+  .kill-btn::after{
+    content:"";
+    position:absolute;
+    top:0;
+    left:-60%;
+    width:40%;
+    height:100%;
+    background:linear-gradient(100deg, transparent, rgba(255,255,255,0.42), transparent);
+    transform:translateX(0);
+    transition:transform .7s ease;
+  }
+  .kill-btn:not(:disabled):hover::after{ transform:translateX(420%); }
+  .kill-btn:not(:disabled):hover{ filter:brightness(1.07); }
+  .kill-btn:not(:disabled):active{ transform:scale(0.988); }
+  .kill-btn:disabled{
+    opacity:0.32;
+    cursor:not-allowed;
+    box-shadow:none;
+  }
+  .kill-btn:focus-visible{ outline:2px solid var(--ember); outline-offset:3px; }
+
+  .status-line{
+    display:none;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+    margin:20px 0 0;
+    font-size:12.5px;
+    line-height:1.5;
+    color:var(--paper-dim);
+    text-align:center;
+    max-width:330px;
+  }
+  .status-line.show{ display:flex; }
+  .status-line.bad{ color:#e79a76; }
+
+  .dot-flicker{
+    flex:none;
+    width:5px; height:5px;
+    border-radius:50%;
+    background:var(--ember);
+    animation:flicker .9s infinite ease-in-out;
+  }
+  @keyframes flicker{ 0%,100%{opacity:.2;} 50%{opacity:1;} }
+  .status-line.bad .dot-flicker{ background:#e79a76; animation:none; opacity:.8; }
+
+  .fineprint{
+    margin-top:18px;
+    font-size:11px;
+    line-height:1.6;
+    color:var(--ash);
+    text-align:center;
+    max-width:300px;
+  }
+  .fineprint .lock{ color:var(--paper-dim); }
+
+  /* ---------- certificate ---------- */
+
   .cert{
     display:none;
+    position:relative;
     width:100%;
-    max-width:340px;
-    background:linear-gradient(180deg, #1c1712 0%, #171310 100%);
-    border:1px solid #3a2f22;
+    max-width:352px;
+    padding:32px 26px 26px;
+    border:1px solid var(--edge);
     border-radius:2px;
-    padding:30px 24px 26px;
+    background:linear-gradient(168deg, #1b1510 0%, #14100c 100%);
+    box-shadow:0 30px 60px -22px rgba(0,0,0,0.9), 0 0 0 4px rgba(255,111,48,0.05);
     text-align:center;
-    animation:rise-in 0.6s ease forwards;
+    overflow:hidden;
   }
-  .cert.show{ display:block; }
-
+  /* opacity:1 is the resting state, not the animation's job - if animations are
+     suppressed the certificate must still be there, it is what was paid for */
+  .cert.show{ display:block; opacity:1; animation:rise-in .7s cubic-bezier(.2,.8,.3,1) both; }
   @keyframes rise-in{
-    from{ opacity:0; transform:translateY(14px); }
-    to{ opacity:1; transform:translateY(0); }
+    from{ opacity:0; transform:translateY(18px) scale(.98); }
+    to{ opacity:1; transform:translateY(0) scale(1); }
+  }
+
+  .cert::before{
+    content:"";
+    position:absolute;
+    inset:9px;
+    border:1px solid rgba(255,111,48,0.14);
+    border-radius:1px;
+    pointer-events:none;
+  }
+
+  .stamp{
+    position:absolute;
+    top:128px;
+    right:14px;
+    transform:rotate(-13deg);
+    padding:5px 11px;
+    border:2px solid rgba(255,111,48,0.28);
+    border-radius:3px;
+    font-size:9.5px;
+    font-weight:600;
+    letter-spacing:0.18em;
+    color:rgba(255,111,48,0.36);
+    pointer-events:none;
   }
 
   .cert-eyebrow{
-    font-size:11px;
-    letter-spacing:0.04em;
+    font-size:9.5px;
+    letter-spacing:0.24em;
     color:var(--ember);
-    margin-bottom:14px;
+    margin:0 0 12px;
+    font-weight:600;
+  }
+  .cert-title{
+    position:relative;
+    font-family:'Cormorant Garamond',serif;
+    font-size:27px;
+    font-style:italic;
+    line-height:1.25;
+    color:var(--paper);
+    margin:0 0 6px;
   }
 
-  .cert-title{
-    font-family:'Cormorant Garamond', serif;
-    font-size:26px;
+  .seal{
+    width:44px;
+    height:44px;
+    margin:22px auto 6px;
+    border-radius:50%;
+    background:radial-gradient(circle at 36% 30%, #c9552a 0%, #90340f 58%, #5c1f06 100%);
+    box-shadow:0 3px 10px -4px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,111,48,0.18), 0 1px 0 rgba(255,255,255,0.14) inset;
+    display:grid;
+    place-items:center;
+    font-family:'Cormorant Garamond',serif;
+    font-size:20px;
     font-style:italic;
-    color:var(--paper);
-    margin:0 0 18px;
+    color:#2a0f04;
+    transform:rotate(-7deg);
   }
 
   .cert-rule{
     height:1px;
-    background:linear-gradient(90deg, transparent, #3a2f22, transparent);
-    margin:18px 0;
+    margin:20px 0;
+    background:linear-gradient(90deg, transparent, var(--edge), transparent);
   }
 
   .cert-row{
     display:flex;
     justify-content:space-between;
-    font-size:12.5px;
-    color:var(--paper-dim);
-    margin-bottom:9px;
+    align-items:baseline;
+    gap:12px;
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--ash);
+    margin-bottom:11px;
   }
   .cert-row span:last-child{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    letter-spacing:0.01em;
+    text-transform:none;
+    text-align:right;
     color:var(--paper);
-    font-weight:500;
+    overflow-wrap:anywhere;
   }
 
   .cert-count{
-    margin-top:18px;
-    font-size:12px;
+    font-size:11.5px;
     color:var(--ash);
+    line-height:1.6;
+    margin:0;
   }
-  .cert-count b{
-    color:var(--ember);
-    font-weight:600;
-  }
+  .cert-count b{ color:var(--ember); font-weight:600; font-family:'IBM Plex Mono',monospace; }
 
   .again-btn{
-    margin-top:24px;
-    background:none;
-    border:1px solid #3a2f22;
-    color:var(--paper-dim);
-    font-family:'Inter', sans-serif;
-    font-size:13px;
-    padding:11px 18px;
-    border-radius:2px;
-    cursor:pointer;
     width:100%;
-    transition:border-color 0.2s ease, color 0.2s ease;
+    margin-top:22px;
+    padding:12px 18px;
+    border:1px solid var(--edge);
+    border-radius:2px;
+    background:none;
+    color:var(--paper-dim);
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    cursor:pointer;
+    transition:border-color .2s ease, color .2s ease, background .2s ease;
   }
   .again-btn:hover{
-    border-color:var(--ember-dim);
+    border-color:rgba(255,111,48,0.45);
     color:var(--paper);
+    background:rgba(255,111,48,0.05);
+  }
+
+  /* ---------- ledger ---------- */
+
+  .wall{
+    width:100%;
+    max-width:352px;
+    margin-top:46px;
+  }
+  .wall-label{
+    font-size:9.5px;
+    letter-spacing:0.2em;
+    text-transform:uppercase;
+    color:var(--ash);
+    text-align:center;
+    margin:0 0 12px;
+  }
+  .wall-list{
+    max-height:158px;
+    overflow-y:auto;
+    padding:12px 14px;
+    border:1px solid var(--edge);
+    border-radius:2px;
+    background:rgba(255,255,255,0.012);
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    scrollbar-width:thin;
+    scrollbar-color:var(--edge) transparent;
+  }
+  .wall-row{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--paper-dim);
+    opacity:.62;
+  }
+  .wall-row time{
+    color:var(--ash);
+    font-family:'Inter',sans-serif;
+    font-size:10px;
+  }
+  .wall-row.new{
+    color:var(--ember);
+    opacity:1;
+    animation:mark-in .8s ease;
+  }
+  @keyframes mark-in{
+    from{ opacity:0; transform:translateX(-8px); }
+    to{ opacity:1; transform:translateX(0); }
+  }
+  .wall-empty{
+    font-size:11px;
+    color:var(--ash);
+    text-align:center;
+    padding:8px 0;
+    margin:0;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{
+      animation-duration:.01ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:.01ms !important;
+    }
+    #embers{ display:none; }
   }
 </style>
 </head>
 <body>
 
-<div class="stage">
-  <div class="mark"></div>
-  <h1>One rupee.<br>One regret.</h1>
-  <p class="sub">Type it. Pay it. Watch it die. No refunds, no judgment, no trace.</p>
-  <p class="ticker" id="ticker">loading the count…</p>
+<canvas id="embers" aria-hidden="true"></canvas>
+<div class="hearth" aria-hidden="true"></div>
+<div class="flare" aria-hidden="true"></div>
+<div class="torch" id="torch" aria-hidden="true"></div>
+
+<main class="stage">
+  <div class="coal" aria-hidden="true"></div>
+  <h1>One rupee.<span class="em">One regret.</span></h1>
+  <p class="sub">Write down the thing you are still carrying. Pay a rupee. Watch it burn.</p>
+  <p class="ticker" id="ticker" aria-live="polite">lighting the furnace&hellip;</p>
 
   <div class="note-wrap" id="noteWrap">
-    <div class="note" id="note">
-      <p class="note-label">what are you carrying</p>
-      <textarea id="regretInput" maxlength="180" placeholder="I never called her back after the funeral..."></textarea>
-      <div class="count"><span id="charCount">0</span>/180</div>
-      <div class="ash-field" id="ashField"></div>
+    <div class="note burnable" id="note">
+      <p class="note-label">What are you carrying</p>
+      <textarea id="regretInput" maxlength="180" spellcheck="false" aria-label="Your regret"
+        placeholder="I never called her back after the funeral&hellip;"></textarea>
+      <div class="count"><span id="charCount">0</span>&thinsp;/&thinsp;180</div>
     </div>
+    <div class="char-line" id="charLine" aria-hidden="true"></div>
+    <div class="ash-field" id="ashField" aria-hidden="true"></div>
   </div>
 
-  <button class="kill-btn" id="killBtn" disabled>Kill it — ₹1</button>
-  <div class="status-line" id="statusLine">
-    <span class="dot-flicker"></span>
-    <span id="statusText">processing payment…</span>
-  </div>
-  <p class="fineprint">Payment via UPI. What you type never leaves this page.</p>
+  <button class="kill-btn" id="killBtn" disabled>Burn it &mdash; &#8377;1</button>
 
-  <div class="cert" id="cert">
+  <p class="status-line" id="statusLine" role="status">
+    <span class="dot-flicker" aria-hidden="true"></span>
+    <span id="statusText">opening the payment window&hellip;</span>
+  </p>
+
+  <p class="fineprint" id="fineprint">
+    <span class="lock">Your words never leave this page.</span><br>
+    Only a one-way hash of them is written to the ledger.
+  </p>
+
+  <section class="cert" id="cert" aria-live="polite">
+    <div class="stamp" aria-hidden="true">TERMINATED</div>
     <p class="cert-eyebrow">CERTIFICATE OF TERMINATION</p>
-    <p class="cert-title">This regret has been dealt with.</p>
+    <p class="cert-title">This one has been<br>dealt with.</p>
+    <div class="seal" aria-hidden="true">R</div>
     <div class="cert-rule"></div>
-    <div class="cert-row"><span>Serial</span><span id="certSerial">—</span></div>
-    <div class="cert-row"><span>Date</span><span id="certDate">—</span></div>
-    <div class="cert-row"><span>Status</span><span>Terminated</span></div>
+    <div class="cert-row"><span>Serial</span><span id="certSerial">&mdash;</span></div>
+    <div class="cert-row"><span>Date</span><span id="certDate">&mdash;</span></div>
+    <div class="cert-row"><span>Receipt</span><span id="certReceipt">&mdash;</span></div>
     <div class="cert-rule"></div>
-    <p class="cert-count">You're the <b id="certCount">—</b>th person to let one go here.</p>
-    <button class="again-btn" id="againBtn">Kill another</button>
-  </div>
+    <p class="cert-count" id="certCountLine">You are the <b id="certCount">&mdash;</b> person to let one go here.</p>
+    <button class="again-btn" id="againBtn">Burn another</button>
+  </section>
 
-  <div class="wall" id="wall">
-    <p class="wall-label">the ledger — hashed, never readable</p>
+  <section class="wall" id="wall">
+    <p class="wall-label">The ledger &mdash; hashed, never readable</p>
     <div class="wall-list" id="wallList"></div>
-  </div>
-</div>
+  </section>
+</main>
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
-  const input = document.getElementById('regretInput');
-  const charCount = document.getElementById('charCount');
-  const killBtn = document.getElementById('killBtn');
-  const note = document.getElementById('note');
-  const noteWrap = document.getElementById('noteWrap');
-  const statusLine = document.getElementById('statusLine');
-  const statusText = document.getElementById('statusText');
-  const ashField = document.getElementById('ashField');
-  const cert = document.getElementById('cert');
-  const certSerial = document.getElementById('certSerial');
-  const certDate = document.getElementById('certDate');
-  const certCount = document.getElementById('certCount');
-  const againBtn = document.getElementById('againBtn');
-  const fineprint = document.querySelector('.fineprint');
+(function(){
+  'use strict';
 
-  input.addEventListener('input', () => {
-    charCount.textContent = input.value.length;
-    killBtn.disabled = input.value.trim().length === 0;
-  });
+  function $(id){ return document.getElementById(id); }
 
-  function spawnAsh(){
-    for(let i=0;i<14;i++){
-      const a = document.createElement('div');
-      a.className = 'ash';
-      a.style.left = (10 + Math.random()*80) + '%';
-      a.style.setProperty('--drift', (Math.random()*60 - 30) + 'px');
-      a.style.animationDelay = (Math.random()*0.5) + 's';
-      ashField.appendChild(a);
-      requestAnimationFrame(() => a.classList.add('go'));
+  var input      = $('regretInput'),
+      charCount  = $('charCount'),
+      killBtn    = $('killBtn'),
+      note       = $('note'),
+      noteWrap   = $('noteWrap'),
+      charLine   = $('charLine'),
+      ashField   = $('ashField'),
+      statusLine = $('statusLine'),
+      statusText = $('statusText'),
+      fineprint  = $('fineprint'),
+      cert       = $('cert'),
+      certSerial = $('certSerial'),
+      certDate   = $('certDate'),
+      certReceipt= $('certReceipt'),
+      certCountLine = $('certCountLine'),
+      againBtn   = $('againBtn'),
+      ticker     = $('ticker'),
+      wallList   = $('wallList'),
+      torch      = $('torch'),
+      root       = document.documentElement;
+
+  var MAX_WALL = 40;
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ------------------------------------------------------------ the rag mask
+  // A vertical alpha ramp pushed around by fractal noise, so the edge that
+  // travels up the paper is ragged like a real burn line instead of a straight
+  // wipe. Slid upward by --burn-y at animation time.
+  // The rect and the filter region both run well past the 400x1200 viewport, so
+  // the displacement never samples empty space and bites chunks out of the
+  // paper's edges. The ramp sits at 0.42-0.58 because the visible third of the
+  // mask must stay fully opaque at rest and fully clear at the end of travel,
+  // with room for the +/-75px the displacement can shift it.
+  var RAG =
+    "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='1200' preserveAspectRatio='none'%3E" +
+    "%3Cdefs%3E" +
+    "%3ClinearGradient id='g' gradientUnits='userSpaceOnUse' x1='0' y1='0' x2='0' y2='1200'%3E" +
+    "%3Cstop offset='0.42' stop-color='%23ffffff' stop-opacity='1'/%3E" +
+    "%3Cstop offset='0.58' stop-color='%23ffffff' stop-opacity='0'/%3E" +
+    "%3C/linearGradient%3E" +
+    "%3Cfilter id='r' filterUnits='userSpaceOnUse' x='-300' y='-500' width='1000' height='2200'%3E" +
+    "%3CfeTurbulence type='fractalNoise' baseFrequency='0.009 0.013' numOctaves='4' seed='11' result='n'/%3E" +
+    "%3CfeDisplacementMap in='SourceGraphic' in2='n' scale='150' xChannelSelector='R' yChannelSelector='G'/%3E" +
+    // Without this the wide ramp reads as fog rolling over the page. Steepening
+    // alpha around the midpoint collapses it to a hard edge while keeping every
+    // wobble the displacement just put into it.
+    "%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='7' intercept='-3'/%3E%3C/feComponentTransfer%3E" +
+    "%3C/filter%3E" +
+    "%3C/defs%3E" +
+    "%3Crect x='-300' y='-500' width='1000' height='2200' fill='url(%23g)' filter='url(%23r)'/%3E%3C/svg%3E\")";
+
+  var maskOK = !!(window.CSS && CSS.supports &&
+    (CSS.supports('mask-image', 'linear-gradient(#000,#000)') ||
+     CSS.supports('-webkit-mask-image', 'linear-gradient(#000,#000)')));
+
+  if (maskOK) root.style.setProperty('--rag', RAG);
+  else document.body.classList.add('no-mask');
+
+  // ------------------------------------------------------------ drifting embers
+  (function embers(){
+    if (reduceMotion) return;
+    var canvas = $('embers'), ctx = canvas.getContext('2d'), dots = [], w = 0, h = 0, raf = 0;
+
+    function size(){
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = canvas.clientWidth; h = canvas.clientHeight;
+      canvas.width = Math.max(1, w * dpr);
+      canvas.height = Math.max(1, h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
+    function make(y){
+      return {
+        x: Math.random() * w,
+        y: y,
+        r: 0.5 + Math.random() * 1.5,
+        v: 0.12 + Math.random() * 0.42,
+        a: 0.08 + Math.random() * 0.38,
+        p: Math.random() * Math.PI * 2,
+        s: 0.4 + Math.random() * 0.9
+      };
+    }
+    function seed(){
+      dots = [];
+      var n = Math.round(Math.min(46, Math.max(18, w / 26)));
+      for (var i = 0; i < n; i++) dots.push(make(Math.random() * h));
+    }
+    function frame(){
+      ctx.clearRect(0, 0, w, h);
+      for (var i = 0; i < dots.length; i++){
+        var d = dots[i];
+        d.y -= d.v;
+        d.p += 0.008 * d.s;
+        if (d.y < -12){ dots[i] = make(h + 12); continue; }
+        var x = d.x + Math.sin(d.p) * 14;
+        var fade = d.a * (0.55 + 0.45 * Math.sin(d.p * 2.1));
+        ctx.beginPath();
+        ctx.arc(x, d.y, d.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,' + (110 + Math.round(d.s * 60)) + ',60,' + fade.toFixed(3) + ')';
+        ctx.fill();
+      }
+      raf = requestAnimationFrame(frame);
+    }
+    size(); seed(); raf = requestAnimationFrame(frame);
+    window.addEventListener('resize', function(){ size(); seed(); });
+    document.addEventListener('visibilitychange', function(){
+      cancelAnimationFrame(raf);
+      if (!document.hidden) raf = requestAnimationFrame(frame);
+    });
+  })();
+
+  // torch glow follows the pointer, mouse only
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && !reduceMotion){
+    window.addEventListener('pointermove', function(e){
+      torch.style.transform = 'translate3d(' + e.clientX + 'px,' + e.clientY + 'px,0)';
+      torch.classList.add('lit');
+    }, { passive: true });
   }
 
-  const ticker = document.getElementById('ticker');
-  const wallList = document.getElementById('wallList');
-  const MAX_WALL = 40;
-  let localFallback = { count: 0, wall: [] };
+  // ------------------------------------------------------------ helpers
 
-  async function sha256Hex(text){
-    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  function sleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+
+  function Fail(code, message){
+    this.name = 'Fail';
+    this.code = code;
+    this.message = message;
+  }
+  Fail.prototype = Object.create(Error.prototype);
+  Fail.prototype.constructor = Fail;
+
+  function sha256Hex(text){
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)).then(function(buf){
+      return Array.prototype.map.call(new Uint8Array(buf), function(b){
+        return b.toString(16).padStart(2, '0');
+      }).join('');
+    });
   }
 
   function fmtTime(ts){
-    const d = new Date(ts);
-    return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short' });
+    var d = new Date(ts);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+  }
+
+  function ordinal(n){
+    var suffix = ['th','st','nd','rd'], v = n % 100;
+    return n.toLocaleString('en-IN') + (suffix[(v - 20) % 10] || suffix[v] || suffix[0]);
+  }
+
+  function say(text, bad){
+    statusText.textContent = text;
+    statusLine.classList.add('show');
+    statusLine.classList.toggle('bad', !!bad);
+  }
+  function hush(){ statusLine.classList.remove('show', 'bad'); }
+
+  // fetch that gives up rather than hanging, and always resolves to a shape
+  function ask(url, options, timeoutMs){
+    var ctrl = new AbortController();
+    var timer = setTimeout(function(){ ctrl.abort(); }, timeoutMs || 15000);
+    var opts = Object.assign({}, options || {});
+    opts.signal = ctrl.signal;
+
+    return fetch(url, opts).then(function(res){
+      clearTimeout(timer);
+      return res.json().catch(function(){ return {}; }).then(function(body){
+        return { ok: res.ok, status: res.status, body: body || {} };
+      });
+    }, function(){
+      clearTimeout(timer);
+      throw new Fail('network', ERRORS.network);
+    });
+  }
+
+  // ------------------------------------------------------------ ledger view
+
+  var ledger = { count: 0, wall: [] };
+
+  function renderTicker(n){
+    ticker.innerHTML = '';
+    var b = document.createElement('b');
+    b.textContent = n.toLocaleString('en-IN');
+    ticker.appendChild(b);
+    ticker.appendChild(document.createTextNode(' regrets terminated so far'));
+  }
+
+  var tickerTween = 0, tickerBail = 0;
+  function rollTo(target){
+    cancelAnimationFrame(tickerTween);
+    clearTimeout(tickerBail);
+
+    if (reduceMotion || document.hidden){ renderTicker(target); return; }
+
+    var from = 0, start = null, dur = 900;
+    // Same rAF-stops-in-a-hidden-tab problem as the burn: make sure the real
+    // number lands even if the count-up never gets to run.
+    tickerBail = setTimeout(function(){
+      cancelAnimationFrame(tickerTween);
+      renderTicker(target);
+    }, dur + 300);
+
+    function step(ts){
+      if (start === null) start = ts;
+      var k = Math.min(1, (ts - start) / dur);
+      var eased = 1 - Math.pow(1 - k, 3);
+      renderTicker(Math.round(from + (target - from) * eased));
+      if (k < 1) tickerTween = requestAnimationFrame(step);
+      else clearTimeout(tickerBail);
+    }
+    tickerTween = requestAnimationFrame(step);
   }
 
   function renderWall(data, newHash){
-    ticker.innerHTML = '<b>' + data.count.toLocaleString('en-IN') + '</b> regrets terminated so far';
     wallList.innerHTML = '';
-    if(!data.wall.length){
-      wallList.innerHTML = '<p class="wall-empty">be the first entry</p>';
+    var rows = (data.wall || []).filter(function(e){ return e && e.h; });
+    if (!rows.length){
+      var empty = document.createElement('p');
+      empty.className = 'wall-empty';
+      empty.textContent = 'be the first entry';
+      wallList.appendChild(empty);
       return;
     }
-    data.wall.forEach(entry => {
-      const row = document.createElement('div');
+    rows.forEach(function(entry){
+      var row = document.createElement('div');
       row.className = 'wall-row' + (entry.h === newHash ? ' new' : '');
-      row.innerHTML = '<span>' + entry.h.slice(0,12) + '</span><time>' + fmtTime(entry.t) + '</time>';
+      var hash = document.createElement('span');
+      hash.textContent = String(entry.h).slice(0, 12);
+      var when = document.createElement('time');
+      when.textContent = fmtTime(entry.t);
+      row.appendChild(hash);
+      row.appendChild(when);
       wallList.appendChild(row);
     });
   }
 
-  async function loadWall(){
-    try{
-      const res = await fetch('/api/regrets');
-      if(!res.ok) throw new Error('ledger fetch failed');
-      const data = await res.json();
-      localFallback = data;
-      renderWall(data);
-    }catch(e){
-      renderWall(localFallback);
-    }
+  function loadWall(){
+    return ask('/api/regrets', {}, 10000).then(function(r){
+      if (!r.ok) throw new Fail('ledger', 'ledger unavailable');
+      ledger = { count: r.body.count || 0, wall: r.body.wall || [] };
+      rollTo(ledger.count);
+      renderWall(ledger);
+    }).catch(function(){
+      ticker.textContent = 'the ledger is warming up';
+      renderWall(ledger);
+    });
   }
 
-  async function recordRegret(regretText){
-    const fullHash = await sha256Hex(regretText + '|' + Date.now() + '|' + Math.random());
-    const shortHash = fullHash.slice(0, 12);
-    try{
-      const res = await fetch('/api/regrets', {
+  // ------------------------------------------------------------ payment
+
+  var ERRORS = {
+    not_configured:      'the furnace is not wired up yet',
+    gateway_error:       'the payment gateway is not answering',
+    gateway_rejected:    'the payment gateway refused that order',
+    blocked:             'your browser blocked the payment window — turn off the ad blocker and reload',
+    cancelled:           'you closed the window — nothing was charged',
+    payment_failed:      'the payment did not go through — nothing was charged',
+    payment_not_captured:'that payment has not settled — nothing was burned',
+    signature_mismatch:  'we could not verify that payment',
+    order_mismatch:      'we could not verify that payment',
+    amount_mismatch:     'we could not verify that payment',
+    already_used:        'that payment was already used',
+    verify_failed:       'we could not confirm that payment — nothing was burned',
+    network:             'no line to the furnace — check your connection'
+  };
+
+  // Tapping the button again cannot help these, so do not suggest it.
+  var NO_RETRY = { blocked: 1 };
+
+  function messageFor(code, fallback){
+    return ERRORS[code] || fallback || 'something went wrong';
+  }
+
+  function createOrder(){
+    function attempt(retriesLeft){
+      return ask('/api/create-order', { method: 'POST' }, 15000).then(function(r){
+        if (r.ok && r.body.order_id && r.body.key_id) return r.body;
+        throw new Fail(r.body.code || 'gateway_error', messageFor(r.body.code));
+      }).catch(function(err){
+        // One retry, but only for a flaky line - never for a refusal.
+        if (err.code === 'network' && retriesLeft > 0){
+          return sleep(700).then(function(){ return attempt(retriesLeft - 1); });
+        }
+        throw err;
+      });
+    }
+    return attempt(1);
+  }
+
+  function verify(payload){
+    // The money is already gone by the time we get here, so try harder than
+    // once before telling anyone it failed.
+    function attempt(retriesLeft){
+      return ask('/api/verify-payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ hash: shortHash })
+        body: JSON.stringify(payload)
+      }, 20000).then(function(r){
+        if (r.ok && r.body.verified) return r.body;
+        throw new Fail(r.body.code || 'verify_failed', messageFor(r.body.code, ERRORS.verify_failed));
+      }).catch(function(err){
+        if (err.code === 'network' && retriesLeft > 0){
+          return sleep(1200).then(function(){ return attempt(retriesLeft - 1); });
+        }
+        throw err;
       });
-      if(!res.ok) throw new Error('ledger write failed');
-      const data = await res.json();
-      localFallback = data;
-      renderWall(data, shortHash);
-      return { count: data.count, hash: shortHash };
-    }catch(e){
-      localFallback.count += 1;
-      localFallback.wall.unshift({ h: shortHash, t: Date.now() });
-      localFallback.wall = localFallback.wall.slice(0, MAX_WALL);
-      renderWall(localFallback, shortHash);
-      return { count: localFallback.count, hash: shortHash };
     }
+    return attempt(2);
   }
 
-  loadWall();
+  function checkout(order, hash){
+    if (typeof window.Razorpay !== 'function'){
+      return Promise.reject(new Fail('blocked', ERRORS.blocked));
+    }
 
-  async function payOneRupee(){
-    const orderRes = await fetch('/api/create-order', { method: 'POST' });
-    if(!orderRes.ok) throw new Error('order-failed');
-    const order = await orderRes.json();
+    return new Promise(function(resolve, reject){
+      var settled = false;
+      function finish(fn, value){ if (!settled){ settled = true; fn(value); } }
 
-    return new Promise((resolve, reject) => {
-      const rzp = new Razorpay({
+      var rzp = new window.Razorpay({
         key: order.key_id,
         amount: order.amount,
         currency: order.currency,
         order_id: order.order_id,
         name: 'One Rupee, One Regret',
-        description: 'Digital cleansing, guilt killing.',
-        theme: { color: '#c65a2e' },
-        handler: async function(response){
-          try{
-            const verifyRes = await fetch('/api/verify-payment', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-              }),
-            });
-            const verifyData = await verifyRes.json();
-            if(verifyRes.ok && verifyData.verified){
-              resolve(verifyData);
-            } else {
-              reject(new Error('verify-failed'));
-            }
-          } catch(e){
-            reject(new Error('verify-failed'));
-          }
+        description: 'One regret, terminated.',
+        theme: { color: '#ff6f30', backdrop_color: '#0a0807' },
+        retry: { enabled: true, max_count: 3 },
+        remember_customer: false,
+        timeout: 300,
+        handler: function(response){
+          say('payment received — confirming…');
+          verify({
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+            hash: hash
+          }).then(function(data){
+            finish(resolve, data);
+          }, function(err){
+            err.paymentId = response.razorpay_payment_id;
+            finish(reject, err);
+          });
         },
         modal: {
-          ondismiss: function(){ reject(new Error('cancelled')); },
-        },
+          escape: true,
+          ondismiss: function(){ finish(reject, new Fail('cancelled', ERRORS.cancelled)); }
+        }
       });
-      rzp.on('payment.failed', function(){ reject(new Error('payment-failed')); });
+
+      rzp.on('payment.failed', function(e){
+        var desc = e && e.error && e.error.description;
+        finish(reject, new Fail('payment_failed', desc || ERRORS.payment_failed));
+      });
+
       rzp.open();
     });
   }
 
-  killBtn.addEventListener('click', async () => {
-    killBtn.disabled = true;
-    input.disabled = true;
-    statusLine.classList.add('show');
-    fineprint.style.visibility = 'hidden';
+  // ------------------------------------------------------------ the burn
 
-    try {
-      statusText.textContent = 'processing payment…';
-      await payOneRupee();
-      statusText.textContent = 'payment received — deleting…';
-    } catch (err) {
-      statusText.textContent = err.message === 'cancelled'
-        ? 'payment cancelled — tap to try again'
-        : 'payment failed — tap to try again';
-      killBtn.disabled = false;
-      input.disabled = false;
-      fineprint.style.visibility = 'visible';
-      setTimeout(() => statusLine.classList.remove('show'), 2200);
-      return;
+  function spawnAsh(count, fromTop){
+    for (var i = 0; i < count; i++){
+      var a = document.createElement('div');
+      a.className = 'ash';
+      var warm = Math.random() > 0.45;
+      a.style.background = warm ? 'rgba(255,150,60,0.95)' : 'rgba(120,108,96,0.8)';
+      if (warm) a.style.boxShadow = '0 0 6px 1px rgba(255,120,40,0.55)';
+      a.style.left = (6 + Math.random() * 88) + '%';
+      a.style.top = fromTop + 'px';
+      a.style.setProperty('--drift', (Math.random() * 80 - 40).toFixed(0) + 'px');
+      a.style.setProperty('--lift', (120 + Math.random() * 190).toFixed(0) + 'px');
+      a.style.setProperty('--dur', (1.4 + Math.random() * 1.4).toFixed(2) + 's');
+      a.style.animationDelay = (Math.random() * 0.45).toFixed(2) + 's';
+      ashField.appendChild(a);
+      (function(el){ requestAnimationFrame(function(){ el.classList.add('go'); }); })(a);
     }
-    await new Promise(r => setTimeout(r, 400));
+  }
 
-    note.classList.add('burning');
-    spawnAsh();
+  function burn(){
+    var h = note.offsetHeight;
 
-    const regretText = input.value.trim();
-    const { count, hash } = await recordRegret(regretText);
+    if (!maskOK || reduceMotion){
+      note.classList.add('burning');
+      spawnAsh(14, h * 0.8);
+      root.style.setProperty('--burn-glow', '1');
+      return sleep(reduceMotion ? 400 : 1700).then(function(){
+        root.style.setProperty('--burn-glow', '0');
+      });
+    }
 
-    await new Promise(r => setTimeout(r, 1700));
-    noteWrap.style.display = 'none';
-    killBtn.style.display = 'none';
-    statusLine.classList.remove('show');
-    fineprint.style.display = 'none';
+    var travel = h * 2;            // matches the 300% mask height
+    var duration = 2300;
 
-    const now = new Date();
-    certSerial.textContent = hash.slice(0,12);
-    certDate.textContent = now.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
-    certCount.textContent = count.toLocaleString('en-IN');
-    cert.classList.add('show');
+    return new Promise(function(resolve){
+      var start = null, lastAsh = 0, done = false;
+
+      // requestAnimationFrame stops firing in a backgrounded tab. The money is
+      // already taken by this point, so never let a hidden tab strand someone
+      // on a half-burnt page - snap to the end and hand over the certificate.
+      var bail = setTimeout(function(){ finish(); }, duration + 800);
+
+      function finish(){
+        if (done) return;
+        done = true;
+        clearTimeout(bail);
+        root.style.setProperty('--burn-y', (-travel) + 'px');
+        root.style.setProperty('--burn-glow', '0');
+        charLine.style.opacity = '0';
+        resolve();
+      }
+
+      charLine.style.opacity = '0.95';
+      charLine.style.top = h + 'px';
+
+      function frame(ts){
+        if (done) return;
+        if (start === null) start = ts;
+        var k = Math.min(1, (ts - start) / duration);
+        var eased = k * k * (3 - 2 * k);   // creeps, then runs
+
+        root.style.setProperty('--burn-y', (-travel * eased) + 'px');
+        root.style.setProperty('--burn-glow', Math.sin(Math.PI * k).toFixed(3));
+
+        // the glowing front rides just ahead of the dissolve
+        var front = h * (1 - eased);
+        charLine.style.top = front + 'px';
+        charLine.style.opacity = String(0.95 * Math.min(1, (1 - k) * 3));
+
+        if (ts - lastAsh > 110){
+          lastAsh = ts;
+          spawnAsh(2, front);
+        }
+
+        if (k < 1) requestAnimationFrame(frame);
+        else finish();
+      }
+      requestAnimationFrame(frame);
+    });
+  }
+
+  function resetBurn(){
+    root.style.setProperty('--burn-y', '0px');
+    root.style.setProperty('--burn-glow', '0');
+    charLine.style.opacity = '0';
+    charLine.style.top = '100%';
+    ashField.innerHTML = '';
+    note.classList.remove('burning');
+  }
+
+  // ------------------------------------------------------------ flow
+
+  input.addEventListener('input', function(){
+    charCount.textContent = input.value.length;
+    killBtn.disabled = input.value.trim().length === 0;
   });
 
-  againBtn.addEventListener('click', () => {
+  var busy = false;
+
+  function unlock(){
+    killBtn.disabled = input.value.trim().length === 0;
+    input.disabled = false;
+    fineprint.style.visibility = 'visible';
+    busy = false;
+  }
+
+  killBtn.addEventListener('click', function(){
+    if (busy) return;
+    var regretText = input.value.trim();
+    if (!regretText) return;
+
+    busy = true;
+    killBtn.disabled = true;
+    input.disabled = true;
+    fineprint.style.visibility = 'hidden';
+    say('opening the payment window…');
+
+    // Hashed here, in the browser. The words themselves are never sent anywhere.
+    sha256Hex(regretText + '|' + Date.now() + '|' + Math.random())
+      .then(function(full){
+        var hash = full.slice(0, 12);
+        return createOrder()
+          .then(function(order){ return checkout(order, hash); })
+          .then(function(receipt){ return { hash: hash, receipt: receipt }; });
+      })
+      .then(function(result){
+        say('payment confirmed — burning…');
+        return burn().then(function(){ return result; });
+      })
+      .then(function(result){
+        var receipt = result.receipt;
+        var count = (receipt.count === null || receipt.count === undefined)
+          ? ledger.count + 1
+          : receipt.count;
+
+        if (receipt.wall){
+          ledger = { count: count, wall: receipt.wall };
+        } else {
+          ledger.count = count;
+          ledger.wall.unshift({ h: result.hash, t: Date.now() });
+          ledger.wall = ledger.wall.slice(0, MAX_WALL);
+        }
+        rollTo(count);
+        renderWall(ledger, result.hash);
+
+        noteWrap.style.display = 'none';
+        killBtn.style.display = 'none';
+        fineprint.style.display = 'none';
+        hush();
+
+        certSerial.textContent = result.hash;
+        certDate.textContent = new Date().toLocaleDateString('en-IN',
+          { day: '2-digit', month: 'short', year: 'numeric' });
+        // The whole id, not a slice of it - a truncated one is useless to
+        // anyone trying to look the payment up.
+        certReceipt.textContent = receipt.payment_id || '—';
+
+        certCountLine.innerHTML = '';
+        certCountLine.appendChild(document.createTextNode('You are the '));
+        var b = document.createElement('b');
+        b.textContent = ordinal(count);
+        certCountLine.appendChild(b);
+        certCountLine.appendChild(document.createTextNode(' person to let one go here.'));
+
+        cert.classList.add('show');
+        busy = false;
+      })
+      .catch(function(err){
+        var text = (err && err.message) ? err.message : messageFor();
+        if (err && err.paymentId){
+          // Money moved but we could not confirm it. The id is the only thread
+          // back to that payment - put it in front of them.
+          text += ' — keep this id: ' + err.paymentId;
+        } else if (!(err && NO_RETRY[err.code])){
+          text += ' — tap to try again';
+        }
+        say(text, true);
+        resetBurn();
+        unlock();
+      });
+  });
+
+  againBtn.addEventListener('click', function(){
     cert.classList.remove('show');
-    note.classList.remove('burning');
-    ashField.innerHTML = '';
+    resetBurn();
     input.value = '';
     input.disabled = false;
     charCount.textContent = '0';
@@ -605,7 +1197,12 @@
     killBtn.disabled = true;
     fineprint.style.display = 'block';
     fineprint.style.visibility = 'visible';
+    hush();
+    input.focus();
   });
+
+  loadWall();
+})();
 </script>
 
 </body>
