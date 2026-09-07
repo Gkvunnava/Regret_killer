@@ -407,6 +407,7 @@
   </div>
 </div>
 
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
   const input = document.getElementById('regretInput');
   const charCount = document.getElementById('charCount');
@@ -507,15 +508,70 @@
 
   loadWall();
 
+  async function payOneRupee(){
+    const orderRes = await fetch('/api/create-order', { method: 'POST' });
+    if(!orderRes.ok) throw new Error('order-failed');
+    const order = await orderRes.json();
+
+    return new Promise((resolve, reject) => {
+      const rzp = new Razorpay({
+        key: order.key_id,
+        amount: order.amount,
+        currency: order.currency,
+        order_id: order.order_id,
+        name: 'One Rupee, One Regret',
+        description: 'Digital cleansing, guilt killing.',
+        theme: { color: '#c65a2e' },
+        handler: async function(response){
+          try{
+            const verifyRes = await fetch('/api/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            });
+            const verifyData = await verifyRes.json();
+            if(verifyRes.ok && verifyData.verified){
+              resolve(verifyData);
+            } else {
+              reject(new Error('verify-failed'));
+            }
+          } catch(e){
+            reject(new Error('verify-failed'));
+          }
+        },
+        modal: {
+          ondismiss: function(){ reject(new Error('cancelled')); },
+        },
+      });
+      rzp.on('payment.failed', function(){ reject(new Error('payment-failed')); });
+      rzp.open();
+    });
+  }
+
   killBtn.addEventListener('click', async () => {
     killBtn.disabled = true;
     input.disabled = true;
     statusLine.classList.add('show');
     fineprint.style.visibility = 'hidden';
 
-    // Simulated payment step — wire a real Razorpay Payment Link/checkout here.
-    await new Promise(r => setTimeout(r, 1100));
-    statusText.textContent = 'payment received — deleting…';
+    try {
+      statusText.textContent = 'processing payment…';
+      await payOneRupee();
+      statusText.textContent = 'payment received — deleting…';
+    } catch (err) {
+      statusText.textContent = err.message === 'cancelled'
+        ? 'payment cancelled — tap to try again'
+        : 'payment failed — tap to try again';
+      killBtn.disabled = false;
+      input.disabled = false;
+      fineprint.style.visibility = 'visible';
+      setTimeout(() => statusLine.classList.remove('show'), 2200);
+      return;
+    }
     await new Promise(r => setTimeout(r, 400));
 
     note.classList.add('burning');
