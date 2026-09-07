@@ -8,18 +8,27 @@ export const MAX_WALL = 40;
 // signature can never be replayed while anyone would still care.
 const PAYMENT_TTL_SECONDS = 60 * 60 * 24 * 90;
 
+// Vercel injects UPSTASH_REDIS_REST_* when the store comes from the Upstash
+// marketplace entry and KV_REST_API_* when it is provisioned as Vercel KV.
+// Redis.fromEnv() only knows the first pair, so accept either.
+function credentials() {
+  const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
+  return url && token ? { url, token } : null;
+}
+
 let cached;
 
-// Redis.fromEnv() throws when UPSTASH_REDIS_REST_URL / _TOKEN are absent, and it
-// throws on every call. Resolve it once so a missing ledger degrades quietly
-// instead of turning a successful payment into a 500.
+// Resolved once, and never throws on the hot path, so a missing ledger degrades
+// quietly instead of turning a successful payment into a 500.
 export function getRedis() {
   if (cached === undefined) {
-    try {
-      cached = Redis.fromEnv();
-    } catch (err) {
-      console.error('ledger: redis not configured -', err.message);
+    const creds = credentials();
+    if (!creds) {
+      console.error('ledger: no redis credentials (UPSTASH_REDIS_REST_* or KV_REST_API_*)');
       cached = null;
+    } else {
+      cached = new Redis(creds);
     }
   }
   if (!cached) throw new Error('Ledger is not configured.');
